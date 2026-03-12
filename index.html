@@ -372,6 +372,27 @@
   /* HIDDEN by default — results sections */
   .results-section { display: none; }
   .results-section.visible { display: flex; flex-direction: column; gap: 32px; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    body { padding: 24px 20px; }
+    .section-header { flex-direction: column; gap: 0; }
+    .section-header h1 { font-size: 20px; line-height: 32px; white-space: normal; }
+    .section-header .subtitle { font-size: 20px; line-height: 32px; }
+    .inputs-wrapper { max-width: 100%; }
+    .description-content { max-width: 100%; }
+    .separator { width: 100%; }
+    .map-table { width: 100%; }
+    .code-snippet { max-width: 100%; }
+    .audio-player { max-width: 100%; }
+    .viseme-chips { gap: 6px; }
+    .chip { width: 80px; height: 65px; padding: 10px; }
+    .chip-char { font-size: 14px; }
+    .chip-time { font-size: 10px; }
+    .section-legend { gap: 10px; }
+    .legend-label { font-size: 11px; }
+    .btn-generate { font-size: 14px; padding: 10px 20px; }
+  }
 </style>
 </head>
 <body>
