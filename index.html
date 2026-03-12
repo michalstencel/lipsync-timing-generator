@@ -500,6 +500,7 @@
         </div>
       </div>
       <audio id="audio-player"></audio>
+      <button class="btn-copy" id="btn-download-mp3" onclick="downloadMp3()">DOWNLOAD MP3</button>
     </div>
 
     <!-- VISEME TIMELINE -->
@@ -545,6 +546,7 @@
         <div class="code-content"><pre id="code-json"></pre></div>
       </div>
       <button class="btn-copy" id="btn-copy-json" onclick="copyCode('json')">COPY JSON</button>
+      <button class="btn-copy" id="btn-download-zip" onclick="downloadZip()" style="margin-top:8px;">DOWNLOAD ZIP (MP3 + JSON)</button>
     </div>
 
   </div><!-- /results-section -->
@@ -598,6 +600,7 @@ function buildVisemeTimeline(chars, startTimes) {
 let visemeTimeline = [];
 let rawJSON = '';
 let jsCode = '';
+let storedAudioBase64 = '';
 
 async function generate() {
   const apiKey = document.getElementById('api-key').value.trim();
@@ -639,6 +642,7 @@ async function generate() {
     const data = await res.json();
     const { characters, character_start_times_seconds } = data.alignment;
     const audioBase64 = data.audio_base64;
+    storedAudioBase64 = audioBase64;
 
     visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds);
     const digraphCount = visemeTimeline.filter(e => e.digraph).length;
@@ -711,6 +715,55 @@ async function copyCode(type) {
   btn.textContent = 'COPIED!';
   btn.classList.add('copied');
   setTimeout(() => { btn.textContent = type === 'js' ? 'COPY CODE' : 'COPY JSON'; btn.classList.remove('copied'); }, 2000);
+}
+
+// ── DOWNLOAD MP3 ──────────────────────────────────────────────────────────────
+function downloadMp3() {
+  if (!storedAudioBase64) return;
+  const a = document.createElement('a');
+  a.href = `data:audio/mp3;base64,${storedAudioBase64}`;
+  a.download = 'lipsync-audio.mp3';
+  a.click();
+}
+
+// ── DOWNLOAD ZIP ──────────────────────────────────────────────────────────────
+async function downloadZip() {
+  if (!storedAudioBase64 || !rawJSON) return;
+
+  const btn = document.getElementById('btn-download-zip');
+  btn.textContent = 'PREPARING...';
+  btn.disabled = true;
+
+  try {
+    if (!window.JSZip) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    const zip = new JSZip();
+    zip.file('lipsync-audio.mp3', storedAudioBase64, { base64: true });
+    zip.file('lipsync-timing.json', rawJSON);
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lipsync-export.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    btn.textContent = 'DOWNLOADED!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'DOWNLOAD ZIP (MP3 + JSON)'; btn.classList.remove('copied'); btn.disabled = false; }, 2000);
+  } catch (err) {
+    btn.textContent = 'ERROR — TRY AGAIN';
+    btn.disabled = false;
+  }
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
