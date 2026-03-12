@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///Users/michal/Downloads/lipsync_tool_v4_1.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lip Sync Timing Generator — rive.expert</title>
-<link rel="preconnect" href="https://fonts.googleapis.com/">
-<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-<link href="./lipsync-timing-generator_files/css2" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   @font-face {
     font-family: 'Geist Pixel';
@@ -392,7 +392,7 @@
       <div class="alert">
         <div class="alert-icon">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 7.5V10.833M10 13.333h.008M8.575 2.992L1.658 14.583A1.667 1.667 0 0 0 3.083 17h13.834a1.667 1.667 0 0 0 1.425-2.417L11.425 2.992a1.667 1.667 0 0 0-2.85 0Z" stroke="#FFD60A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M10 7.5V10.833M10 13.333h.008M8.575 2.992L1.658 14.583A1.667 1.667 0 0 0 3.083 17h13.834a1.667 1.667 0 0 0 1.425-2.417L11.425 2.992a1.667 1.667 0 0 0-2.85 0Z" stroke="#FFD60A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
         <p>Remove your API key from ElevenLabs after each use.</p>
@@ -463,11 +463,11 @@
       <div class="section-label">Audio</div>
       <div class="audio-player">
         <button class="audio-btn" id="btn-play" onclick="togglePlay()">
-          <svg id="icon-play" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5l9 5.5-9 5.5V2.5z"></path></svg>
-          <svg id="icon-pause" style="display:none" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"></rect><rect x="9" y="2" width="4" height="12" rx="1"></rect></svg>
+          <svg id="icon-play" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5l9 5.5-9 5.5V2.5z"/></svg>
+          <svg id="icon-pause" style="display:none" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></svg>
         </button>
         <button class="audio-btn" onclick="toggleMute()">
-          <svg id="icon-vol" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5.5v5h3l4 3.5V2L5 5.5H2z"></path><path d="M11.5 4.5a5 5 0 0 1 0 7M13 3a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="1.2" fill="none"></path></svg>
+          <svg id="icon-vol" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5.5v5h3l4 3.5V2L5 5.5H2z"/><path d="M11.5 4.5a5 5 0 0 1 0 7M13 3a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
         </button>
         <div class="audio-progress-wrap">
           <span class="audio-time" id="audio-current">00:00</span>
@@ -512,7 +512,7 @@
         <div class="code-gutter" id="code-gutter-js"></div>
         <div class="code-content"><pre id="code-js"></pre></div>
       </div>
-      <button class="btn-copy" id="btn-copy-js" onclick="copyCode(&#39;js&#39;)">COPY CODE</button>
+      <button class="btn-copy" id="btn-copy-js" onclick="copyCode('js')">COPY CODE</button>
     </div>
 
     <!-- RAW JSON -->
@@ -523,7 +523,7 @@
         <div class="code-gutter" id="code-gutter-json"></div>
         <div class="code-content"><pre id="code-json"></pre></div>
       </div>
-      <button class="btn-copy" id="btn-copy-json" onclick="copyCode(&#39;json&#39;)">COPY JSON</button>
+      <button class="btn-copy" id="btn-copy-json" onclick="copyCode('json')">COPY JSON</button>
     </div>
 
   </div><!-- /results-section -->
@@ -747,7 +747,13 @@ function seekAudio(e) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) generate();
 });
+
+// ── AUTO HEIGHT dla iframe ───────────────────────────────────────────────────
+function sendHeight() {
+  window.parent.postMessage({ iframeHeight: document.body.scrollHeight }, '*');
+}
+window.addEventListener('load', sendHeight);
+new ResizeObserver(sendHeight).observe(document.body);
 </script>
-
-
-</body></html>
+</body>
+</html>
