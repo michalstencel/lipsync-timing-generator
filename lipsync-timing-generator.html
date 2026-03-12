@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///Users/michal/Downloads/lipsync_tool_v4_1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lip Sync Timing Generator — rive.expert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./lipsync-timing-generator_files/css2" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'Geist Pixel';
+    src: url('https://raw.githubusercontent.com/vercel/geist-font/main/packages/next/dist/fonts/geist-pixel/GeistPixel-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-cell: #fdfdfd;
+    --text-primary: #111111;
+    --text-secondary: #717680;
+    --text-light: #aaaaaa;
+    --border: #e9eaeb;
+    --accent: #6c47ff;
+    --teal: #00d1b2;
+    --yellow: #ffd600;
+    --error: #ff4d00;
+
+    --v0: #d3d3d3;
+    --v1: #6c47ff;
+    --v2: #00d1b2;
+    --v3: #ffd600;
+    --v4: #ff4d6d;
+    --v5: #00b4d8;
+    --v6: #ff6b35;
+    --v7: #a8e063;
+    --v8: #bf5af2;
+    --v9: #ff9f1c;
+
+    --font: 'Geist Mono', monospace;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 32px 48px;
+  }
+
+  /* LAYOUT */
+  .tool-wrapper {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    max-width: 1216px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* HEADER */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    overflow: hidden;
+  }
+  .section-header h1 {
+    font-family: 'Geist Pixel', var(--font);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 44px;
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+  .section-header h1 span { color: var(--accent); }
+  .section-header .subtitle {
+    font-family: 'Geist Pixel', var(--font);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 44px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+
+  /* DESCRIPTION */
+  .section-description { width: 100%; }
+  .description-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 640px;
+  }
+  .description-content p {
+    font-size: 12px;
+    line-height: 24px;
+    color: var(--text-primary);
+  }
+
+  /* ALERT */
+  .alert {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .alert-icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .alert-icon svg { width: 18px; height: 18px; }
+  .alert p { font-size: 12px; line-height: 20px; color: var(--text-secondary); }
+
+  /* INPUTS */
+  .section-inputs { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .inputs-wrapper { display: flex; flex-direction: column; gap: 16px; max-width: 640px; width: 100%; }
+  .input-field { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+  .input-field label { font-size: 12px; line-height: 20px; color: var(--text-secondary); }
+  .input-field input,
+  .input-field textarea {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 24px;
+    color: var(--text-primary);
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-field input:focus,
+  .input-field textarea:focus { border-color: var(--accent); }
+  .input-field textarea { height: 128px; resize: vertical; }
+  .input-field input::placeholder,
+  .input-field textarea::placeholder { color: var(--text-secondary); }
+
+  .spacer { height: 16px; }
+
+  /* BUTTON */
+  .btn-generate {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px 24px;
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .btn-generate:hover { opacity: 0.9; }
+  .btn-generate:active { transform: scale(0.98); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status-msg {
+    font-size: 12px;
+    line-height: 24px;
+    min-height: 24px;
+    transition: color 0.2s;
+  }
+  .status-msg.error { color: var(--error); }
+  .status-msg.success { color: var(--teal); }
+  .status-msg.loading { color: var(--text-secondary); }
+
+  /* SEPARATOR */
+  .separator-wrapper { padding: 16px 0; }
+  .separator { background: var(--border); height: 1px; width: 640px; }
+
+  /* SECTION LABEL */
+  .section-label { font-size: 12px; line-height: 20px; color: var(--text-secondary); }
+
+  /* VISEME MAP TABLE */
+  .section-viseme-map { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .map-table {
+    border: 1px solid var(--border);
+    display: flex;
+    width: 640px;
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .map-table-col { display: flex; flex-direction: column; flex: 1; }
+  .map-table-col:not(:last-child) { border-right: 1px solid var(--border); }
+  .table-header {
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    height: 44px;
+    display: flex; align-items: center;
+    font-size: 10px; line-height: 20px; color: var(--text-primary);
+  }
+  .table-cell {
+    background: var(--bg-cell);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    font-size: 10px; line-height: 20px; color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .table-cell:last-child { border-bottom: none; }
+
+  /* AUDIO */
+  .section-audio { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .audio-player {
+    max-width: 640px;
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .audio-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 8px; border-radius: 6px;
+    color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .audio-btn:hover { background: var(--border); }
+  .audio-btn svg { width: 16px; height: 16px; }
+  .audio-progress-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+  }
+  .audio-time { font-size: 12px; line-height: 18px; white-space: nowrap; }
+  .audio-slider-wrap {
+    flex: 1;
+    height: 8px;
+    background: rgba(0,0,0,0.12);
+    border-radius: 9999px;
+    position: relative;
+    cursor: pointer;
+  }
+  .audio-slider-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--text-primary);
+    border-radius: 9999px;
+    width: 0%;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .audio-slider-head {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 8px;
+    background: var(--text-primary);
+    border-radius: 9999px;
+    pointer-events: none;
+  }
+  audio { display: none; }
+
+  /* VISEME TIMELINE */
+  .section-viseme { display: flex; flex-direction: column; gap: 0; width: 100%; }
+  .viseme-label-row {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .viseme-hint { font-size: 12px; color: var(--text-light); }
+
+  /* LEGEND */
+  .section-legend { display: flex; flex-wrap: wrap; gap: 16px; width: 100%; margin-bottom: 16px; }
+  .legend-item { display: flex; gap: 8px; align-items: center; }
+  .legend-dot { width: 16px; height: 16px; flex-shrink: 0; }
+  .legend-label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+
+  /* CHIPS */
+  .viseme-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+  .chip {
+    border: 1px solid;
+    border-radius: var(--radius);
+    padding: 16px;
+    width: 100px;
+    height: 75px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .chip.digraph { border-width: 2px; box-shadow: 0 0 0 1px #fff; }
+  .chip-char { font-size: 16px; font-weight: 600; line-height: 20px; }
+  .chip-time { font-size: 12px; font-weight: 400; line-height: 20px; }
+
+  /* CODE */
+  .section-code { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+  .code-snippet {
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    max-width: 640px;
+    overflow: hidden;
+    max-height: 300px;
+  }
+  .code-gutter {
+    background: var(--bg-cell);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    flex-shrink: 0;
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--text-secondary);
+    min-width: 44px;
+  }
+  .code-gutter span { display: block; }
+  .code-content {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+  }
+  .code-content pre {
+    font-family: var(--font);
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--text-primary);
+    white-space: pre;
+    margin: 0;
+  }
+
+  .btn-copy {
+    background: var(--text-light);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 24px;
+    cursor: pointer;
+    transition: background 0.15s;
+    align-self: flex-start;
+    letter-spacing: 0.02em;
+  }
+  .btn-copy:hover { background: #888; }
+  .btn-copy.copied { background: var(--teal); }
+
+  /* HIDDEN by default — results sections */
+  .results-section { display: none; }
+  .results-section.visible { display: flex; flex-direction: column; gap: 32px; }
+</style>
+</head>
+<body>
+
+<div class="tool-wrapper">
+
+  <!-- HEADER -->
+  <div class="section-header">
+    <h1>Lip Sync <span>Timing Generator</span></h1>
+    <span class="subtitle">ElevenLabs → Rive</span>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="section-description">
+    <div class="description-content">
+      <p>Enter your ElevenLabs API key, Voice ID, and text. The tool calls the ElevenLabs with-timestamps endpoint, maps each character to one of 10 English mouth shapes, and outputs a millisecond-accurate timing array plus ready-to-use JS code for your Rive state machine at runtime.</p>
+      <p>The 10 visemes cover the full range of English phonemes. Non-English text may produce less accurate results.</p>
+      <div class="alert">
+        <div class="alert-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 7.5V10.833M10 13.333h.008M8.575 2.992L1.658 14.583A1.667 1.667 0 0 0 3.083 17h13.834a1.667 1.667 0 0 0 1.425-2.417L11.425 2.992a1.667 1.667 0 0 0-2.85 0Z" stroke="#FFD60A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+        <p>Remove your API key from ElevenLabs after each use.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUTS -->
+  <div class="section-inputs">
+    <div class="inputs-wrapper">
+      <div class="input-field">
+        <label for="api-key">API Key</label>
+        <input type="password" id="api-key" placeholder="sk_...">
+      </div>
+      <div class="input-field">
+        <label for="voice-id">Voice ID</label>
+        <input type="text" id="voice-id" placeholder="Z3R...">
+      </div>
+      <div class="input-field">
+        <label for="text-input">Text</label>
+        <textarea id="text-input" placeholder="Enter your text here..."></textarea>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-start;">
+      <button class="btn-generate" id="btn-generate" onclick="generate()">GENERATE TIMING</button>
+      <div class="status-msg" id="status-msg"></div>
+    </div>
+  </div>
+
+  <!-- SEPARATOR -->
+  <div class="separator-wrapper"><div class="separator"></div></div>
+
+  <!-- VISEME MAP -->
+  <div class="section-viseme-map">
+    <div class="section-label">Viseme Map</div>
+    <div class="map-table">
+      <div class="map-table-col">
+        <div class="table-header">Value</div>
+        <div class="table-cell">0</div><div class="table-cell">1</div><div class="table-cell">2</div>
+        <div class="table-cell">3</div><div class="table-cell">4</div><div class="table-cell">5</div>
+        <div class="table-cell">6</div><div class="table-cell">7</div><div class="table-cell">8</div>
+        <div class="table-cell">9</div>
+      </div>
+      <div class="map-table-col">
+        <div class="table-header">Rive state</div>
+        <div class="table-cell">00_NEUTRAL</div><div class="table-cell">01_AEI</div><div class="table-cell">02_BMP</div>
+        <div class="table-cell">03_FV</div><div class="table-cell">04_CDGKNRSTXYZ</div><div class="table-cell">05_U</div>
+        <div class="table-cell">06_ChJSh</div><div class="table-cell">07_L</div><div class="table-cell">08_O</div>
+        <div class="table-cell">09_QW</div>
+      </div>
+      <div class="map-table-col">
+        <div class="table-header">Characters</div>
+        <div class="table-cell">space, rest</div><div class="table-cell">A E I</div><div class="table-cell">B M P</div>
+        <div class="table-cell">F V</div><div class="table-cell">C D G K N R S T X Y Z</div><div class="table-cell">U</div>
+        <div class="table-cell">Ch Sh J H</div><div class="table-cell">L</div><div class="table-cell">O</div>
+        <div class="table-cell">Q W</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS (hidden until generated) -->
+  <div class="results-section" id="results-section">
+
+    <!-- AUDIO -->
+    <div class="section-audio">
+      <div class="separator-wrapper" style="padding-bottom:0"><div class="separator"></div></div>
+      <div class="section-label">Audio</div>
+      <div class="audio-player">
+        <button class="audio-btn" id="btn-play" onclick="togglePlay()">
+          <svg id="icon-play" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5l9 5.5-9 5.5V2.5z"></path></svg>
+          <svg id="icon-pause" style="display:none" viewBox="0 0 16 16" fill="currentColor"><rect x="3" y="2" width="4" height="12" rx="1"></rect><rect x="9" y="2" width="4" height="12" rx="1"></rect></svg>
+        </button>
+        <button class="audio-btn" onclick="toggleMute()">
+          <svg id="icon-vol" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5.5v5h3l4 3.5V2L5 5.5H2z"></path><path d="M11.5 4.5a5 5 0 0 1 0 7M13 3a7 7 0 0 1 0 10" stroke="currentColor" stroke-width="1.2" fill="none"></path></svg>
+        </button>
+        <div class="audio-progress-wrap">
+          <span class="audio-time" id="audio-current">00:00</span>
+          <div class="audio-slider-wrap" id="audio-slider" onclick="seekAudio(event)">
+            <div class="audio-slider-fill" id="audio-fill"></div>
+            <div class="audio-slider-head" id="audio-head"></div>
+          </div>
+          <span class="audio-time" id="audio-remaining">-00:00</span>
+        </div>
+      </div>
+      <audio id="audio-player"></audio>
+    </div>
+
+    <!-- VISEME TIMELINE -->
+    <div class="section-viseme">
+      <div class="separator-wrapper"><div class="separator"></div></div>
+      <div class="viseme-label-row">
+        <span class="section-label">Viseme Timeline</span>
+        <span class="viseme-hint">White border = Digraph detected</span>
+      </div>
+      <!-- LEGEND -->
+      <div class="section-legend" id="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v0)"></div><span class="legend-label">0 Neutral</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v1)"></div><span class="legend-label">1 AEI</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v2)"></div><span class="legend-label">2 BMP</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v3)"></div><span class="legend-label">3 FV</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v4)"></div><span class="legend-label">4 CDGK...</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v5)"></div><span class="legend-label">5 U</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v6)"></div><span class="legend-label">6 Ch/Sh/J/H</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v7)"></div><span class="legend-label">7 L</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v8)"></div><span class="legend-label">8 O</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v9)"></div><span class="legend-label">9 QW</span></div>
+      </div>
+      <div class="viseme-chips" id="viseme-chips"></div>
+    </div>
+
+    <!-- JS CODE -->
+    <div class="section-code">
+      <div class="separator-wrapper"><div class="separator"></div></div>
+      <div class="section-label">JS CODE</div>
+      <div class="code-snippet">
+        <div class="code-gutter" id="code-gutter-js"></div>
+        <div class="code-content"><pre id="code-js"></pre></div>
+      </div>
+      <button class="btn-copy" id="btn-copy-js" onclick="copyCode(&#39;js&#39;)">COPY CODE</button>
+    </div>
+
+    <!-- RAW JSON -->
+    <div class="section-code">
+      <div class="separator-wrapper"><div class="separator"></div></div>
+      <div class="section-label">RAW JSON</div>
+      <div class="code-snippet">
+        <div class="code-gutter" id="code-gutter-json"></div>
+        <div class="code-content"><pre id="code-json"></pre></div>
+      </div>
+      <button class="btn-copy" id="btn-copy-json" onclick="copyCode(&#39;json&#39;)">COPY JSON</button>
+    </div>
+
+  </div><!-- /results-section -->
+
+</div><!-- /tool-wrapper -->
+
+<script>
+// ── VISEME MAP ──────────────────────────────────────────────────────────────
+const VISEME_MAP = {
+  'A':1,'E':1,'I':1,
+  'B':2,'M':2,'P':2,
+  'F':3,'V':3,
+  'C':4,'D':4,'G':4,'K':4,'N':4,'R':4,'S':4,'T':4,'X':4,'Y':4,'Z':4,
+  'U':5,
+  'J':6,'H':6,
+  'L':7,
+  'O':8,
+  'Q':9,'W':9,
+};
+const DIGRAPHS = {'CH':6,'SH':6};
+const VISEME_COLORS = ['#d3d3d3','#6c47ff','#00d1b2','#ffd600','#ff4d6d','#00b4d8','#ff6b35','#a8e063','#bf5af2','#ff9f1c'];
+
+function charToViseme(ch) {
+  return VISEME_MAP[ch.toUpperCase()] ?? 0;
+}
+
+function buildVisemeTimeline(chars, startTimes) {
+  const events = [];
+  let i = 0;
+  while (i < chars.length) {
+    const pair = (chars[i] + (chars[i+1] || '')).toUpperCase();
+    if (DIGRAPHS[pair] !== undefined) {
+      events.push({ chars: chars[i]+chars[i+1], viseme: DIGRAPHS[pair], timeMs: Math.round(startTimes[i]*1000), digraph: true });
+      i += 2;
+    } else {
+      const v = charToViseme(chars[i]);
+      events.push({ chars: chars[i], viseme: v, timeMs: Math.round(startTimes[i]*1000), digraph: false });
+      i++;
+    }
+  }
+  // Deduplicate consecutive same viseme
+  const deduped = [];
+  let prev = -1;
+  for (const e of events) {
+    if (e.viseme !== prev) { deduped.push(e); prev = e.viseme; }
+  }
+  return deduped;
+}
+
+// ── GENERATE ────────────────────────────────────────────────────────────────
+let visemeTimeline = [];
+let rawJSON = '';
+let jsCode = '';
+
+async function generate() {
+  const apiKey = document.getElementById('api-key').value.trim();
+  const voiceId = document.getElementById('voice-id').value.trim();
+  const text = document.getElementById('text-input').value.trim();
+
+  const status = document.getElementById('status-msg');
+
+  if (!apiKey || !voiceId || !text) {
+    status.textContent = 'Fill in all fields';
+    status.className = 'status-msg error';
+    return;
+  }
+
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true;
+  status.textContent = 'Calling ElevenLabs API...';
+  status.className = 'status-msg loading';
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'xi-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    const { characters, character_start_times_seconds } = data.alignment;
+    const audioBase64 = data.audio_base64;
+
+    visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds);
+    const digraphCount = visemeTimeline.filter(e => e.digraph).length;
+
+    status.textContent = `Done! ${visemeTimeline.length} viseme events, ${digraphCount} digraph${digraphCount !== 1 ? 's' : ''} detected.`;
+    status.className = 'status-msg success';
+
+    // Audio
+    const audioEl = document.getElementById('audio-player');
+    audioEl.src = `data:audio/mp3;base64,${audioBase64}`;
+    audioEl.load();
+    setupAudio(audioEl);
+
+    // Build outputs
+    buildChips(visemeTimeline);
+    buildCode(visemeTimeline);
+
+    document.getElementById('results-section').style.display = 'flex';
+    document.getElementById('results-section').style.flexDirection = 'column';
+    document.getElementById('results-section').style.gap = '0';
+
+  } catch (err) {
+    status.textContent = `Error: ${err.message}`;
+    status.className = 'status-msg error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── CHIPS ────────────────────────────────────────────────────────────────────
+function buildChips(timeline) {
+  const container = document.getElementById('viseme-chips');
+  container.innerHTML = '';
+  for (const e of timeline) {
+    const color = VISEME_COLORS[e.viseme];
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (e.digraph ? ' digraph' : '');
+    chip.style.borderColor = color;
+    chip.style.color = color;
+    chip.style.background = `linear-gradient(90deg,rgba(255,255,255,0.78),rgba(255,255,255,0.78)),${color}`;
+    chip.innerHTML = `<span class="chip-char">${e.chars}</span><span class="chip-time">${e.timeMs}ms</span>`;
+    container.appendChild(chip);
+  }
+}
+
+// ── CODE ─────────────────────────────────────────────────────────────────────
+function buildCode(timeline) {
+  const jsonStr = JSON.stringify(timeline.map(({chars,viseme,timeMs}) => ({chars,viseme,timeMs})), null, 2);
+  rawJSON = jsonStr;
+
+  jsCode = `// Rive Lip Sync — paste into your JS\n// Make sure the Number input in your State Machine is named "phoneme"\n\nconst visemeTimeline = ${jsonStr};\n\n// Play lip sync\nfunction playLipSync(riveInstance) {\n  const inputs = riveInstance.stateMachineInputs('sm-inputs');\n  const phoneme = inputs.find(i => i.name === 'phoneme');\n  visemeTimeline.forEach(({ viseme, timeMs }) => {\n    setTimeout(() => { phoneme.value = viseme; }, timeMs);\n  });\n}`;
+
+  renderCode('js', jsCode);
+  renderCode('json', jsonStr);
+}
+
+function renderCode(type, text) {
+  const pre = document.getElementById(`code-${type}`);
+  const gutter = document.getElementById(`code-gutter-${type}`);
+  pre.textContent = text;
+  const lines = text.split('\n').length;
+  gutter.innerHTML = Array.from({length: lines}, (_,i) => `<span>${i+1}</span>`).join('');
+}
+
+// ── COPY ─────────────────────────────────────────────────────────────────────
+async function copyCode(type) {
+  const text = type === 'js' ? jsCode : rawJSON;
+  const btn = document.getElementById(`btn-copy-${type}`);
+  await navigator.clipboard.writeText(text).catch(() => {});
+  btn.textContent = 'COPIED!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = type === 'js' ? 'COPY CODE' : 'COPY JSON'; btn.classList.remove('copied'); }, 2000);
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────────────────────
+function setupAudio(audio) {
+  audio.ontimeupdate = updateProgress;
+  audio.onended = () => {
+    document.getElementById('icon-play').style.display = '';
+    document.getElementById('icon-pause').style.display = 'none';
+  };
+}
+
+function formatTime(s) {
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60);
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function updateProgress() {
+  const audio = document.getElementById('audio-player');
+  const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  document.getElementById('audio-fill').style.width = pct + '%';
+  document.getElementById('audio-head').style.left = `calc(${pct}% - 4px)`;
+  document.getElementById('audio-current').textContent = formatTime(audio.currentTime);
+  const rem = audio.duration ? audio.duration - audio.currentTime : 0;
+  document.getElementById('audio-remaining').textContent = '-' + formatTime(rem);
+}
+
+function togglePlay() {
+  const audio = document.getElementById('audio-player');
+  if (audio.paused) {
+    audio.play();
+    document.getElementById('icon-play').style.display = 'none';
+    document.getElementById('icon-pause').style.display = '';
+  } else {
+    audio.pause();
+    document.getElementById('icon-play').style.display = '';
+    document.getElementById('icon-pause').style.display = 'none';
+  }
+}
+
+function toggleMute() {
+  const audio = document.getElementById('audio-player');
+  audio.muted = !audio.muted;
+}
+
+function seekAudio(e) {
+  const audio = document.getElementById('audio-player');
+  if (!audio.duration) return;
+  const rect = document.getElementById('audio-slider').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = pct * audio.duration;
+}
+
+// Enter key on inputs triggers generate
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) generate();
+});
+</script>
+
+
+</body></html>
