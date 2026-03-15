@@ -547,6 +547,8 @@
       </div>
       <button class="btn-copy" id="btn-copy-json" onclick="copyCode('json')">COPY JSON</button>
       <button class="btn-copy" id="btn-download-zip" onclick="downloadZip()" style="margin-top:8px;">DOWNLOAD ZIP (MP3 + JSON)</button>
+      <div class="txt-guide-hint">Plik .txt z rozpisanymi keyframami dla każdego viseme — czasy, wartości i komentarze do keyframingu w Rive.</div>
+      <button class="btn-copy btn-txt" id="btn-download-txt" onclick="downloadRiveTxt()" style="margin-top:4px;">DOWNLOAD RIVE GUIDE (.TXT)</button>
     </div>
 
   </div><!-- /results-section -->
@@ -585,25 +587,43 @@ function charToViseme(ch) {
   return VISEME_MAP[ch.toUpperCase()] ?? 0;
 }
 
-function buildVisemeTimeline(chars, startTimes) {
+function buildVisemeTimeline(chars, startTimes, endTimes) {
   const events = [];
   let i = 0;
   while (i < chars.length) {
     const pair = (chars[i] + (chars[i+1] || '')).toUpperCase();
     if (DIGRAPHS[pair] !== undefined) {
-      events.push({ chars: chars[i]+chars[i+1], viseme: DIGRAPHS[pair], timeMs: Math.round(startTimes[i]*1000), digraph: true });
+      events.push({
+        chars: chars[i]+chars[i+1],
+        viseme: DIGRAPHS[pair],
+        startMs: Math.round(startTimes[i]*1000),
+        endMs:   Math.round(endTimes[i+1]*1000),
+        digraph: true
+      });
       i += 2;
     } else {
       const v = charToViseme(chars[i]);
-      events.push({ chars: chars[i], viseme: v, timeMs: Math.round(startTimes[i]*1000), digraph: false });
+      events.push({
+        chars: chars[i],
+        viseme: v,
+        startMs: Math.round(startTimes[i]*1000),
+        endMs:   Math.round(endTimes[i]*1000),
+        digraph: false
+      });
       i++;
     }
   }
-  // Deduplicate consecutive same viseme
+  // Deduplicate consecutive same viseme — merge chars and extend endMs
   const deduped = [];
   let prev = -1;
   for (const e of events) {
-    if (e.viseme !== prev) { deduped.push(e); prev = e.viseme; }
+    if (e.viseme !== prev) {
+      deduped.push({ ...e });
+      prev = e.viseme;
+    } else {
+      deduped[deduped.length - 1].endMs = e.endMs;
+      deduped[deduped.length - 1].chars += e.chars;
+    }
   }
   return deduped;
 }
@@ -652,11 +672,11 @@ async function generate() {
     }
 
     const data = await res.json();
-    const { characters, character_start_times_seconds } = data.alignment;
+    const { characters, character_start_times_seconds, character_end_times_seconds } = data.alignment;
     const audioBase64 = data.audio_base64;
     storedAudioBase64 = audioBase64;
 
-    visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds);
+    visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds, character_end_times_seconds);
     const digraphCount = visemeTimeline.filter(e => e.digraph).length;
 
     status.textContent = `Done! ${visemeTimeline.length} viseme events, ${digraphCount} digraph${digraphCount !== 1 ? 's' : ''} detected.`;
@@ -695,20 +715,24 @@ function buildChips(timeline) {
     chip.style.borderColor = color;
     chip.style.color = color;
     chip.style.background = `linear-gradient(90deg,rgba(255,255,255,0.78),rgba(255,255,255,0.78)),${color}`;
-    chip.innerHTML = `<span class="chip-char">${e.chars}</span><span class="chip-time">${e.timeMs}ms</span>`;
+    const dur = e.endMs - e.startMs;
+    chip.innerHTML = `<span class="chip-char">${e.chars}</span><span class="chip-time">${e.startMs}ms <span style="opacity:0.55">${dur}ms</span></span>`;
     container.appendChild(chip);
   }
 }
 
 // ── CODE ─────────────────────────────────────────────────────────────────────
 function buildCode(timeline) {
-  const jsonStr = JSON.stringify(timeline.map(({chars,viseme,timeMs}) => ({chars,viseme,timeMs})), null, 2);
+  const jsonStr = JSON.stringify(
+    timeline.map(({ chars, viseme, startMs, endMs }) => ({ chars, viseme, startMs, endMs })),
+    null, 2
+  );
   rawJSON = jsonStr;
 
   const inputNamesStr = JSON.stringify(VISEME_INPUTS, null, 2);
   const lines = [
     `// Rive Lip Sync — paste into your JS`,
-    `// State machine: "sm-blend" | Number inputs 0–100 | smooth blending`,
+    `// State machine: "sm-blend" | Number inputs 0–100 | start/end aware blending`,
     ``,
     `const visemeTimeline = ${jsonStr};`,
     ``,
@@ -745,7 +769,6 @@ function buildCode(timeline) {
     `    rafId = running ? requestAnimationFrame(tick) : null;`,
     `  }`,
     ``,
-    `  // Smoothly interpolate a single input to a target value`,
     `  function blendTo(name, target, duration) {`,
     `    transitions[name] = { from: values[name], to: target,`,
     `                          startTime: performance.now(), duration };`,
@@ -753,23 +776,34 @@ function buildCode(timeline) {
     `  }`,
     ``,
     `  let prevName = null;`,
-    `  visemeTimeline.forEach(({ viseme, timeMs }, i) => {`,
-    `    // Transition duration = 35% of gap to next viseme, clamped 30–100 ms`,
-    `    const nextMs = visemeTimeline[i + 1]?.timeMs ?? timeMs + 300;`,
-    `    const dur = Math.max(30, Math.min(100, (nextMs - timeMs) * 0.35));`,
+    ``,
+    `  visemeTimeline.forEach(({ viseme, startMs, endMs }, i) => {`,
+    `    const duration  = endMs - startMs;`,
+    `    // fade duration = 25% of viseme duration, clamped 20–60 ms`,
+    `    const fadeDur   = Math.max(20, Math.min(60, duration * 0.25));`,
+    `    const nextEvent = visemeTimeline[i + 1];`,
+    `    const nextStart = nextEvent?.startMs ?? endMs + 500;`,
+    ``,
+    `    // ── Fade IN at startMs ───────────────────────────────────────────────`,
     `    setTimeout(() => {`,
     `      const name = VISEME_INPUTS[viseme];`,
-    `      if (prevName && prevName !== name) blendTo(prevName, 0, dur);`,
-    `      blendTo(name, 100, dur);`,
+    `      if (prevName && prevName !== name) blendTo(prevName, 0, fadeDur);`,
+    `      blendTo(name, 100, fadeDur);`,
     `      prevName = name;`,
-    `    }, timeMs);`,
+    `    }, startMs);`,
+    ``,
+    `    // ── Fade OUT at endMs (only if gap before next viseme) ───────────────`,
+    `    if (nextStart > endMs + fadeDur) {`,
+    `      const outDur = Math.min(fadeDur * 2, nextStart - endMs);`,
+    `      setTimeout(() => { blendTo(VISEME_INPUTS[viseme], 0, outDur); }, endMs);`,
+    `    }`,
     `  });`,
     ``,
     `  // Fade to silence after last viseme`,
     `  const last = visemeTimeline.at(-1);`,
     `  if (last) {`,
     `    setTimeout(() => { if (prevName) blendTo(prevName, 0, 150); },`,
-    `      last.timeMs + 200);`,
+    `      last.endMs + 100);`,
     `  }`,
     `}`,
   ];
