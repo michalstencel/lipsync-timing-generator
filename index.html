@@ -459,11 +459,11 @@
         <div class="table-cell">9</div>
       </div>
       <div class="map-table-col">
-        <div class="table-header">Rive state</div>
-        <div class="table-cell">00_NEUTRAL</div><div class="table-cell">01_AEI</div><div class="table-cell">02_BMP</div>
-        <div class="table-cell">03_FV</div><div class="table-cell">04_CDGKNRSTXYZ</div><div class="table-cell">05_U</div>
-        <div class="table-cell">06_ChJSh</div><div class="table-cell">07_L</div><div class="table-cell">08_O</div>
-        <div class="table-cell">09_QW</div>
+        <div class="table-header">Rive input</div>
+        <div class="table-cell">viseme_sil</div><div class="table-cell">viseme_aei</div><div class="table-cell">viseme_bmp</div>
+        <div class="table-cell">viseme_fv</div><div class="table-cell">viseme_cdgncstxyz</div><div class="table-cell">viseme_ou</div>
+        <div class="table-cell">viseme_chshj</div><div class="table-cell">viseme_lth</div><div class="table-cell">viseme_o</div>
+        <div class="table-cell">viseme_qw</div>
       </div>
       <div class="map-table-col">
         <div class="table-header">Characters</div>
@@ -567,6 +567,18 @@ const VISEME_MAP = {
   'Q':9,'W':9,
 };
 const DIGRAPHS = {'CH':6,'SH':6};
+const VISEME_INPUTS = [
+  'viseme_sil',        // 0 — neutral / silence
+  'viseme_aei',        // 1 — A E I
+  'viseme_bmp',        // 2 — B M P
+  'viseme_fv',         // 3 — F V
+  'viseme_cdgncstxyz', // 4 — C D G K N R S T X Y Z
+  'viseme_ou',         // 5 — U / OU
+  'viseme_chshj',      // 6 — Ch Sh J H
+  'viseme_lth',        // 7 — L
+  'viseme_o',          // 8 — O
+  'viseme_qw',         // 9 — Q W
+];
 const VISEME_COLORS = ['#d3d3d3','#6c47ff','#00d1b2','#ffd600','#ff4d6d','#00b4d8','#ff6b35','#a8e063','#bf5af2','#ff9f1c'];
 
 function charToViseme(ch) {
@@ -693,7 +705,8 @@ function buildCode(timeline) {
   const jsonStr = JSON.stringify(timeline.map(({chars,viseme,timeMs}) => ({chars,viseme,timeMs})), null, 2);
   rawJSON = jsonStr;
 
-  jsCode = `// Rive Lip Sync — paste into your JS\n// Make sure the Number input in your State Machine is named "phoneme"\n\nconst visemeTimeline = ${jsonStr};\n\n// Play lip sync\nfunction playLipSync(riveInstance) {\n  const inputs = riveInstance.stateMachineInputs('sm-inputs');\n  const phoneme = inputs.find(i => i.name === 'phoneme');\n  visemeTimeline.forEach(({ viseme, timeMs }) => {\n    setTimeout(() => { phoneme.value = viseme; }, timeMs);\n  });\n}`;
+  const inputNames = JSON.stringify(VISEME_INPUTS, null, 2);
+  jsCode = `// Rive Lip Sync — paste into your JS\n// State machine: "sm-blend" with Number inputs per viseme (0–100)\n\nconst visemeTimeline = ${jsonStr};\n\nconst VISEME_INPUTS = ${inputNames};\n\n// Play lip sync\nfunction playLipSync(riveInstance) {\n  const inputs = riveInstance.stateMachineInputs('sm-blend');\n  const inputMap = {};\n  VISEME_INPUTS.forEach(name => {\n    const inp = inputs.find(i => i.name === name);\n    if (inp) inputMap[name] = inp;\n  });\n\n  let prevName = null;\n  visemeTimeline.forEach(({ viseme, timeMs }) => {\n    setTimeout(() => {\n      if (prevName && inputMap[prevName]) inputMap[prevName].value = 0;\n      const name = VISEME_INPUTS[viseme];\n      if (inputMap[name]) inputMap[name].value = 100;\n      prevName = name;\n    }, timeMs);\n  });\n}`;
 
   renderCode('js', jsCode);
   renderCode('json', jsonStr);
