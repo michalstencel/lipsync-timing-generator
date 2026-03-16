@@ -300,16 +300,17 @@
     border-radius: var(--radius);
     padding: 16px;
     width: 100px;
-    height: 75px;
+    height: 90px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     overflow: hidden;
     flex-shrink: 0;
   }
   .chip.digraph { border-width: 2px; box-shadow: 0 0 0 1px #fff; }
   .chip-char { font-size: 16px; font-weight: 600; line-height: 20px; }
-  .chip-time { font-size: 12px; font-weight: 400; line-height: 20px; }
+  .chip-time { font-size: 11px; font-weight: 400; line-height: 16px; }
+  .chip-label { font-size: 9px; font-weight: 400; line-height: 14px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* CODE */
   .section-code { display: flex; flex-direction: column; gap: 16px; width: 100%; }
@@ -459,11 +460,11 @@
         <div class="table-cell">9</div>
       </div>
       <div class="map-table-col">
-        <div class="table-header">Rive input</div>
-        <div class="table-cell">viseme_sil</div><div class="table-cell">viseme_aei</div><div class="table-cell">viseme_bmp</div>
-        <div class="table-cell">viseme_fv</div><div class="table-cell">viseme_cdgncstxyz</div><div class="table-cell">viseme_ou</div>
-        <div class="table-cell">viseme_chshj</div><div class="table-cell">viseme_lth</div><div class="table-cell">viseme_o</div>
-        <div class="table-cell">viseme_qw</div>
+        <div class="table-header">Viseme name</div>
+        <div class="table-cell">viseme_sil</div><div class="table-cell">viseme_aei</div><div class="table-cell">viseme_mbp</div>
+        <div class="table-cell">viseme_fv</div><div class="table-cell">viseme_cdg</div><div class="table-cell">viseme_u</div>
+        <div class="table-cell">viseme_ch</div><div class="table-cell">viseme_l</div><div class="table-cell">viseme_o</div>
+        <div class="table-cell">viseme_wq</div>
       </div>
       <div class="map-table-col">
         <div class="table-header">Characters</div>
@@ -512,16 +513,16 @@
       </div>
       <!-- LEGEND -->
       <div class="section-legend" id="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v0)"></div><span class="legend-label">0 Neutral</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v1)"></div><span class="legend-label">1 AEI</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v2)"></div><span class="legend-label">2 BMP</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v3)"></div><span class="legend-label">3 FV</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v4)"></div><span class="legend-label">4 CDGK...</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v5)"></div><span class="legend-label">5 U</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v6)"></div><span class="legend-label">6 Ch/Sh/J/H</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v7)"></div><span class="legend-label">7 L</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v8)"></div><span class="legend-label">8 O</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--v9)"></div><span class="legend-label">9 QW</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v0)"></div><span class="legend-label">viseme_sil</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v1)"></div><span class="legend-label">viseme_aei</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v2)"></div><span class="legend-label">viseme_mbp</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v3)"></div><span class="legend-label">viseme_fv</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v4)"></div><span class="legend-label">viseme_cdg</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v5)"></div><span class="legend-label">viseme_u</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v6)"></div><span class="legend-label">viseme_ch</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v7)"></div><span class="legend-label">viseme_l</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v8)"></div><span class="legend-label">viseme_o</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--v9)"></div><span class="legend-label">viseme_wq</span></div>
       </div>
       <div class="viseme-chips" id="viseme-chips"></div>
     </div>
@@ -547,8 +548,6 @@
       </div>
       <button class="btn-copy" id="btn-copy-json" onclick="copyCode('json')">COPY JSON</button>
       <button class="btn-copy" id="btn-download-zip" onclick="downloadZip()" style="margin-top:8px;">DOWNLOAD ZIP (MP3 + JSON)</button>
-      <div class="txt-guide-hint">Plik .txt z rozpisanymi keyframami dla każdego viseme — czasy, wartości i komentarze do keyframingu w Rive.</div>
-      <button class="btn-copy btn-txt" id="btn-download-txt" onclick="downloadRiveTxt()" style="margin-top:4px;">DOWNLOAD RIVE GUIDE (.TXT)</button>
     </div>
 
   </div><!-- /results-section -->
@@ -569,61 +568,32 @@ const VISEME_MAP = {
   'Q':9,'W':9,
 };
 const DIGRAPHS = {'CH':6,'SH':6};
-const VISEME_INPUTS = [
-  'viseme_sil',        // 0 — neutral / silence
-  'viseme_aei',        // 1 — A E I
-  'viseme_bmp',        // 2 — B M P
-  'viseme_fv',         // 3 — F V
-  'viseme_cdgncstxyz', // 4 — C D G K N R S T X Y Z
-  'viseme_ou',         // 5 — U / OU
-  'viseme_chshj',      // 6 — Ch Sh J H
-  'viseme_lth',        // 7 — L
-  'viseme_o',          // 8 — O
-  'viseme_qw',         // 9 — Q W
-];
 const VISEME_COLORS = ['#d3d3d3','#6c47ff','#00d1b2','#ffd600','#ff4d6d','#00b4d8','#ff6b35','#a8e063','#bf5af2','#ff9f1c'];
+const VISEME_NAMES = ['viseme_sil','viseme_aei','viseme_mbp','viseme_fv','viseme_cdg','viseme_u','viseme_ch','viseme_l','viseme_o','viseme_wq'];
 
 function charToViseme(ch) {
   return VISEME_MAP[ch.toUpperCase()] ?? 0;
 }
 
-function buildVisemeTimeline(chars, startTimes, endTimes) {
+function buildVisemeTimeline(chars, startTimes) {
   const events = [];
   let i = 0;
   while (i < chars.length) {
     const pair = (chars[i] + (chars[i+1] || '')).toUpperCase();
     if (DIGRAPHS[pair] !== undefined) {
-      events.push({
-        chars: chars[i]+chars[i+1],
-        viseme: DIGRAPHS[pair],
-        startMs: Math.round(startTimes[i]*1000),
-        endMs:   Math.round(endTimes[i+1]*1000),
-        digraph: true
-      });
+      events.push({ chars: chars[i]+chars[i+1], viseme: DIGRAPHS[pair], label: VISEME_NAMES[DIGRAPHS[pair]], timeMs: Math.round(startTimes[i]*1000), digraph: true });
       i += 2;
     } else {
       const v = charToViseme(chars[i]);
-      events.push({
-        chars: chars[i],
-        viseme: v,
-        startMs: Math.round(startTimes[i]*1000),
-        endMs:   Math.round(endTimes[i]*1000),
-        digraph: false
-      });
+      events.push({ chars: chars[i], viseme: v, label: VISEME_NAMES[v], timeMs: Math.round(startTimes[i]*1000), digraph: false });
       i++;
     }
   }
-  // Deduplicate consecutive same viseme — merge chars and extend endMs
+  // Deduplicate consecutive same viseme
   const deduped = [];
   let prev = -1;
   for (const e of events) {
-    if (e.viseme !== prev) {
-      deduped.push({ ...e });
-      prev = e.viseme;
-    } else {
-      deduped[deduped.length - 1].endMs = e.endMs;
-      deduped[deduped.length - 1].chars += e.chars;
-    }
+    if (e.viseme !== prev) { deduped.push(e); prev = e.viseme; }
   }
   return deduped;
 }
@@ -672,11 +642,11 @@ async function generate() {
     }
 
     const data = await res.json();
-    const { characters, character_start_times_seconds, character_end_times_seconds } = data.alignment;
+    const { characters, character_start_times_seconds } = data.alignment;
     const audioBase64 = data.audio_base64;
     storedAudioBase64 = audioBase64;
 
-    visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds, character_end_times_seconds);
+    visemeTimeline = buildVisemeTimeline(characters, character_start_times_seconds);
     const digraphCount = visemeTimeline.filter(e => e.digraph).length;
 
     status.textContent = `Done! ${visemeTimeline.length} viseme events, ${digraphCount} digraph${digraphCount !== 1 ? 's' : ''} detected.`;
@@ -715,99 +685,17 @@ function buildChips(timeline) {
     chip.style.borderColor = color;
     chip.style.color = color;
     chip.style.background = `linear-gradient(90deg,rgba(255,255,255,0.78),rgba(255,255,255,0.78)),${color}`;
-    const dur = e.endMs - e.startMs;
-    chip.innerHTML = `<span class="chip-char">${e.chars}</span><span class="chip-time">${e.startMs}ms <span style="opacity:0.55">${dur}ms</span></span>`;
+    chip.innerHTML = `<span class="chip-char">${e.chars}</span><span class="chip-time">${e.timeMs}ms</span><span class="chip-label">${VISEME_NAMES[e.viseme]}</span>`;
     container.appendChild(chip);
   }
 }
 
 // ── CODE ─────────────────────────────────────────────────────────────────────
 function buildCode(timeline) {
-  const jsonStr = JSON.stringify(
-    timeline.map(({ chars, viseme, startMs, endMs }) => ({ chars, viseme, startMs, endMs })),
-    null, 2
-  );
+  const jsonStr = JSON.stringify(timeline.map(({chars,viseme,label,timeMs}) => ({chars,viseme,label,timeMs})), null, 2);
   rawJSON = jsonStr;
 
-  const inputNamesStr = JSON.stringify(VISEME_INPUTS, null, 2);
-  const lines = [
-    `// Rive Lip Sync — paste into your JS`,
-    `// State machine: "sm-blend" | Number inputs 0–100 | start/end aware blending`,
-    ``,
-    `const visemeTimeline = ${jsonStr};`,
-    ``,
-    `const VISEME_INPUTS = ${inputNamesStr};`,
-    ``,
-    `function playLipSync(riveInstance) {`,
-    `  const inputs = riveInstance.stateMachineInputs('sm-blend');`,
-    `  const inputMap = {};`,
-    `  VISEME_INPUTS.forEach(name => {`,
-    `    const inp = inputs.find(i => i.name === name);`,
-    `    if (inp) inputMap[name] = inp;`,
-    `  });`,
-    ``,
-    `  // Current blend values (0–100) for each input`,
-    `  const values = {};`,
-    `  VISEME_INPUTS.forEach(name => { values[name] = 0; });`,
-    ``,
-    `  // Active transitions: { from, to, startTime, duration }`,
-    `  const transitions = {};`,
-    `  let rafId = null;`,
-    ``,
-    `  function tick() {`,
-    `    const now = performance.now();`,
-    `    let running = false;`,
-    `    VISEME_INPUTS.forEach(name => {`,
-    `      const t = transitions[name];`,
-    `      if (!t) return;`,
-    `      const p = Math.min((now - t.startTime) / t.duration, 1);`,
-    `      const e = p < 0.5 ? 2*p*p : 1 - (-2*p+2)**2/2; // ease in-out`,
-    `      values[name] = t.from + (t.to - t.from) * e;`,
-    `      if (inputMap[name]) inputMap[name].value = values[name];`,
-    `      if (p < 1) running = true; else delete transitions[name];`,
-    `    });`,
-    `    rafId = running ? requestAnimationFrame(tick) : null;`,
-    `  }`,
-    ``,
-    `  function blendTo(name, target, duration) {`,
-    `    transitions[name] = { from: values[name], to: target,`,
-    `                          startTime: performance.now(), duration };`,
-    `    if (!rafId) rafId = requestAnimationFrame(tick);`,
-    `  }`,
-    ``,
-    `  let prevName = null;`,
-    ``,
-    `  visemeTimeline.forEach(({ viseme, startMs, endMs }, i) => {`,
-    `    const duration  = endMs - startMs;`,
-    `    // fade duration = 25% of viseme duration, clamped 20–60 ms`,
-    `    const fadeDur   = Math.max(20, Math.min(60, duration * 0.25));`,
-    `    const nextEvent = visemeTimeline[i + 1];`,
-    `    const nextStart = nextEvent?.startMs ?? endMs + 500;`,
-    ``,
-    `    // ── Fade IN at startMs ───────────────────────────────────────────────`,
-    `    setTimeout(() => {`,
-    `      const name = VISEME_INPUTS[viseme];`,
-    `      if (prevName && prevName !== name) blendTo(prevName, 0, fadeDur);`,
-    `      blendTo(name, 100, fadeDur);`,
-    `      prevName = name;`,
-    `    }, startMs);`,
-    ``,
-    `    // ── Fade OUT at endMs (only if gap before next viseme) ───────────────`,
-    `    if (nextStart > endMs + fadeDur) {`,
-    `      const outDur = Math.min(fadeDur * 2, nextStart - endMs);`,
-    `      setTimeout(() => { blendTo(VISEME_INPUTS[viseme], 0, outDur); }, endMs);`,
-    `    }`,
-    `  });`,
-    ``,
-    `  // Fade to silence after last viseme`,
-    `  const last = visemeTimeline.at(-1);`,
-    `  if (last) {`,
-    `    setTimeout(() => { if (prevName) blendTo(prevName, 0, 150); },`,
-    `      last.endMs + 100);`,
-    `  }`,
-    `}`,
-  ];
-  jsCode = lines.join('\n');
+  jsCode = `// Rive Lip Sync — paste into your JS\n// Make sure the Number input in your State Machine is named "phoneme"\n// viseme value (int) maps to: 0=viseme_sil, 1=viseme_aei, 2=viseme_mbp,\n//   3=viseme_fv, 4=viseme_cdg, 5=viseme_u, 6=viseme_ch, 7=viseme_l, 8=viseme_o, 9=viseme_wq\n\nconst visemeTimeline = ${jsonStr};\n\n// Play lip sync\nfunction playLipSync(riveInstance) {\n  const inputs = riveInstance.stateMachineInputs('sm-inputs');\n  const phoneme = inputs.find(i => i.name === 'phoneme');\n  visemeTimeline.forEach(({ viseme, timeMs }) => {\n    setTimeout(() => { phoneme.value = viseme; }, timeMs);\n  });\n}`;
 
   renderCode('js', jsCode);
   renderCode('json', jsonStr);
