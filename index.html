@@ -87,6 +87,7 @@
   .canvas-wrap {
     width: 340px;
     height: 340px;
+    flex-shrink: 0;
     background: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -162,6 +163,14 @@
     text-align: center;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+  }
+
+  .char-panel-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
   }
 
   /* HEADER */
@@ -470,13 +479,32 @@
   .results-section.visible { display: flex; flex-direction: column; gap: 32px; }
 
   /* MOBILE */
+  .char-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .char-panel-title {
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .char-panel-arrow {
+    font-size: 18px;
+    color: var(--text-secondary);
+  }
+
   @media (max-width: 960px) {
     .page-layout { grid-template-columns: 1fr; }
     .character-panel { position: static; order: -1; }
     body { padding: 24px 20px; }
     .section-header { flex-direction: column; gap: 0; }
     .section-header h1 { font-size: 20px; line-height: 32px; white-space: normal; }
-    .section-header .subtitle { font-size: 20px; line-height: 32px; }
     .inputs-wrapper { max-width: 100%; }
     .description-content { max-width: 100%; }
     .separator { width: 100%; }
@@ -498,7 +526,6 @@
     <!-- HEADER -->
     <div class="section-header">
       <h1>Lip Sync <span>Timing Generator</span></h1>
-      <span class="subtitle">ElevenLabs → Rive</span>
     </div>
 
     <!-- DESCRIPTION -->
@@ -648,8 +675,13 @@
 
   </div><!-- /tool-wrapper -->
 
-  <!-- RIGHT COLUMN: Character Animation -->
+  <!-- RIGHT COLUMN: Header + Character Animation (sticky) -->
   <div class="character-panel">
+    <div class="char-panel-header">
+      <span class="char-panel-title">ElevenLabs</span>
+      <span class="char-panel-arrow">→</span>
+      <span class="char-panel-title">Rive</span>
+    </div>
     <div class="char-label">rive.expert — lip sync preview</div>
     <div class="canvas-wrap"><canvas id="rive-canvas"></canvas></div>
     <div class="char-status" id="char-status">Loading…</div>
