@@ -479,26 +479,6 @@
   .results-section.visible { display: flex; flex-direction: column; gap: 32px; }
 
   /* MOBILE */
-  .char-panel-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 4px;
-  }
-
-  .char-panel-title {
-    font-family: var(--font);
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-  }
-
-  .char-panel-arrow {
-    font-size: 18px;
-    color: var(--text-secondary);
-  }
-
   @media (max-width: 960px) {
     .page-layout { grid-template-columns: 1fr; }
     .character-panel { position: static; order: -1; }
@@ -671,16 +651,25 @@
         <button class="btn-copy" id="btn-download-zip" onclick="downloadZip()" style="margin-top:8px;">DOWNLOAD ZIP (MP3 + JSON)</button>
       </div>
 
+      <!-- RIVE INSTRUCTIONS TXT -->
+      <div class="section-code">
+        <div class="separator-wrapper"><div class="separator"></div></div>
+        <div class="section-label">Rive Manual Keyframe Guide</div>
+        <div class="code-snippet">
+          <div class="code-gutter" id="code-gutter-txt"></div>
+          <div class="code-content"><pre id="code-txt">Generating guide…</pre></div>
+        </div>
+        <button class="btn-copy" id="btn-download-txt" onclick="downloadTxt()">DOWNLOAD .TXT GUIDE</button>
+      </div>
+
     </div><!-- /results-section -->
 
   </div><!-- /tool-wrapper -->
 
   <!-- RIGHT COLUMN: Header + Character Animation (sticky) -->
   <div class="character-panel">
-    <div class="char-panel-header">
-      <span class="char-panel-title">ElevenLabs</span>
-      <span class="char-panel-arrow">→</span>
-      <span class="char-panel-title">Rive</span>
+    <div class="section-header" style="width:340px">
+      <h1>ElevenLabs <span>→ Rive</span></h1>
     </div>
     <div class="char-label">rive.expert — lip sync preview</div>
     <div class="canvas-wrap"><canvas id="rive-canvas"></canvas></div>
@@ -931,6 +920,10 @@ function buildCode(timeline) {
   jsCode = `// Rive Lip Sync — paste into your JS\n// Make sure the Number input in your State Machine is named "phoneme"\n\nconst visemeTimeline = ${jsonStr};\n\n// Play lip sync\nfunction playLipSync(riveInstance) {\n  const inputs = riveInstance.stateMachineInputs('sm-inputs');\n  const phoneme = inputs.find(i => i.name === 'phoneme');\n  visemeTimeline.forEach(({ viseme, timeMs }) => {\n    setTimeout(() => { phoneme.value = viseme; }, timeMs);\n  });\n}`;
   renderCode('js', jsCode);
   renderCode('json', jsonStr);
+
+  // Build instructions async
+  const userText = document.getElementById('text-input').value.trim();
+  buildInstructions(timeline, userText);
 }
 
 function renderCode(type, text) {
@@ -990,6 +983,386 @@ async function downloadZip() {
     btn.textContent = 'ERROR — TRY AGAIN';
     btn.disabled = false;
   }
+}
+
+// ── ASCII ART GENERATOR ───────────────────────────────────────────────────────
+function generateAsciiArt(text) {
+  const t = text.toLowerCase();
+
+  // ---- keyword → scene map ----
+  const scenes = [
+
+    // nature / weather
+    [/\b(sun|sunshine|sunny|bright|light|day|morning|dawn)\b/, () => `
+        .  . *  .    *  .  .   *
+     *      .  * .       .   *
+    .   *        .    *     .
+          \\  |  /
+      . -- (o_o) --  .   *  .
+          /  |  \\
+    *  .      .    *  .     *  .`],
+
+    [/\b(moon|night|midnight|dark|star|stars|galaxy|space|universe)\b/, () => `
+    *    .  *   .    *  .  *  .
+      .    ·   *   .   ·     *
+    .   *   .  (  )   .  *    .
+       ·      ( ( ) )      ·
+    *    .      (___)  .  *   .
+      .    *   .    ·    .    *`],
+
+    [/\b(rain|rainy|storm|cloud|clouds|thunder|wet|pour)\b/, () => `
+      ___  ___  ___  ___
+     (    (    (    (
+    .  \\  .  \\  .  \\  .  \\
+      / \\ . / \\ . / \\ . / \\
+    /  . \\/  . \\/  . \\/   \\
+    | | | | | | | | | | | |
+    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~`],
+
+    [/\b(wind|breeze|blow|air|fly|flying|bird|birds|sky)\b/, () => `
+       ~  ~  ~   ~   ~  ~
+     ~   >--(  )-->   ~   ~
+    ~  ~     ~~~   ~  ~  ~
+      ~   >-(  )->  ~    ~
+    ~  ~     ~~~  ~   ~  ~
+      ~   ~    ~    ~   ~`],
+
+    [/\b(fire|flame|burn|hot|heat|warm|candle|light)\b/, () => `
+        )  )  )
+       ( (  ) )
+       ) )( ( (
+      (  (__)  )
+       \\ |  | /
+        \\|  |/
+    ~~~~~~~~~~~~~~~~~~~~`],
+
+    [/\b(snow|winter|cold|ice|freeze|frozen|blizzard|white)\b/, () => `
+    *  .  *  .  ❄  .  *  .  *
+    . ❄  .  *  .  ❄  .  *  .
+    *  .  ❄  .  *  .  ❄  .  *
+         |\\ /|
+         | X |   ❄  .  *
+         |/ \\|
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`],
+
+    // animals
+    [/\b(cat|cats|kitten|kitty|meow|purr)\b/, () => `
+    /\\_/\\
+   ( o.o )   ~
+    > ^ <   meow
+   /|   |\\
+  (_|   |_)`],
+
+    [/\b(dog|dogs|puppy|bark|woof|canine)\b/, () => `
+    / \\__
+   (    @\\___
+   /         O
+  /   (_____/
+ /_____/   U`],
+
+    [/\b(fish|ocean|sea|wave|waves|water|swim|river|lake)\b/, () => `
+    ><(((°>   .  .   ><(((°>
+    ~  ~  ~  ~  ~  ~  ~  ~
+      .  ><(((°>  .  .  .
+    ~  ~  ~  ~  ~  ~  ~  ~
+    ><(°>  .  .  .  ><(((°>`],
+
+    [/\b(bird|birds|fly|flying|eagle|hawk|wings)\b/, () => `
+       ___
+    __/   \\__
+   /  \\   /  \\
+  /    \\_/    \\
+  \\   _____   /
+   \\_/ ._. \\_/
+      ( o )
+       ~~~`],
+
+    // music / sound / voice
+    [/\b(music|song|sing|voice|sound|melody|rhythm|beat|listen)\b/, () => `
+    ♩  ♪  ♫  ♬  ♩  ♪
+   ___________________
+  |   |   |   |   |   |
+  |   | | |   | | |   |
+  |   | | |   | | |   |
+  |___|_|_|___|_|_|___|
+    ♬  ♩  ♪  ♫  ♬  ♩`],
+
+    [/\b(talk|speak|say|tell|hello|hi|hey|greet)\b/, () => `
+     _________
+    |         |
+    |  hello! |
+    |_________|
+        \\
+         \\  O
+          \\/ \\
+          / \\ \\
+         /   \\/`],
+
+    // emotions
+    [/\b(happy|happiness|joy|love|smile|laugh|fun|great|wonderful|amazing)\b/, () => `
+     .  \\o/  .  \\o/  .  \\o/
+     .   |   .   |   .   |
+     .  / \\  .  / \\  .  / \\
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      \\o/  .  \\o/  .  \\o/  .
+       |   .   |   .   |   .
+      / \\  .  / \\  .  / \\  .`],
+
+    [/\b(sad|sadness|cry|tears|lonely|alone|miss|lost)\b/, () => `
+         . · .
+       ·   O   ·
+      .  (T_T)  .
+         |   |
+        /     \\
+    ........................`],
+
+    [/\b(angry|rage|mad|furious|hate|fight|war|battle)\b/, () => `
+    \\  >:(  /   \\  >:(  /
+     \\ /  \\ /   \\ /  \\ /
+      X    X     X    X
+     / \\  / \\   / \\  / \\
+    /   \\/   \\ /   \\/   \\`],
+
+    // tech / coding
+    [/\b(code|coding|program|software|computer|hack|data|digital|tech|ai)\b/, () => `
+    01001000 01001001
+    ┌─────────────────┐
+    │ > run lipsync() │
+    │ > OK            │
+    │ > ___           │
+    └─────────────────┘
+    01010010 01001001`],
+
+    // food / drink
+    [/\b(coffee|tea|drink|cup|morning|cafe|latte|espresso)\b/, () => `
+         ) ) )
+        ( ( (
+       .--------.
+       |        |~
+       |  c[_]  |
+       |________|`],
+
+    [/\b(pizza|food|eat|hungry|burger|cake|bread|cook|chef)\b/, () => `
+       .-------.
+      /  o   o  \\
+     /   o   o   \\
+    /  o   o   o  \\
+    \\______________/
+      |  |  |  |
+      pizza time!`],
+
+    // travel / places
+    [/\b(city|town|street|building|house|home|room|place)\b/, () => `
+         /\\   /\\   /\\
+        /  \\ /  \\ /  \\
+       /    X    X    \\
+      |  [] | [] | []  |
+      |_____|_____|_____|
+    ========================`],
+
+    [/\b(mountain|hill|forest|tree|nature|outdoor|hike|climb)\b/, () => `
+             /\\
+            /  \\
+           / /\\ \\
+          / /  \\ \\
+         /  \\  /  \\
+        / /\\ \\/ /\\ \\
+    ~~~~~~~~~~~~~~~~~~~`],
+
+    // time
+    [/\b(time|clock|hour|minute|second|fast|slow|wait|now)\b/, () => `
+         .---.
+        /     \\
+       | 12    |
+       |  \\    |
+       |   \\   |
+       |    \\  |
+        \\     /
+         '---'
+    tick...tock...`],
+
+    // default: visualize the text itself as a speech bubble with initials
+  ];
+
+  for (const [pattern, builder] of scenes) {
+    if (pattern.test(t)) {
+      return builder().split('\n').filter((l,i,a) => !(i===0&&l.trim()==='') && !(i===a.length-1&&l.trim()==='') ).join('\n');
+    }
+  }
+
+  // Fallback: speech bubble + first words
+  const words = text.trim().split(/\s+/).slice(0, 4).join(' ');
+  const padded = ' ' + words + ' ';
+  const bar = '+' + '-'.repeat(padded.length) + '+';
+  return [
+    bar,
+    '|' + padded + '|',
+    bar,
+    '  \\',
+    '   \\   O',
+    '    \\  |\\',
+    '       / \\',
+  ].join('\n');
+}
+
+// ── INSTRUCTIONS TXT ─────────────────────────────────────────────────────────
+let rawTxt = '';
+
+const VISEME_STATE_NAMES = [
+  '00_NEUTRAL', '01_AEI', '02_BMP', '03_FV',
+  '04_CDGKNRSTXYZ', '05_U', '06_ChJSh', '07_L', '08_O', '09_QW'
+];
+
+function buildInstructions(timeline, userText) {
+  const pre = document.getElementById('code-txt');
+  const gutter = document.getElementById('code-gutter-txt');
+  pre.textContent = 'Generating ASCII art…';
+  gutter.innerHTML = '';
+
+  // Generate ASCII art locally based on user text
+  let asciiArt = generateAsciiArt(userText);
+
+  // Build the keyframe entries from the timeline
+  const keyframeLines = timeline.map(({ chars, viseme, timeMs }) => {
+    const stateName = VISEME_STATE_NAMES[viseme] ?? `viseme_${viseme}`;
+    return `  ${String(timeMs).padStart(6)}ms  |  char: "${chars}"  |  state: ${stateName}  (value ${viseme})`;
+  }).join('\n');
+
+  // Assemble the full guide text
+  rawTxt = `
+================================================================================
+  RIVE LIP SYNC — MANUAL KEYFRAME GUIDE
+  Generated by rive.expert / lipsync tool
+================================================================================
+
+  "${userText}"
+
+${asciiArt.split('\n').map(l => '  ' + l).join('\n')}
+
+================================================================================
+  OVERVIEW
+================================================================================
+
+This guide explains how to manually recreate the lip sync animation inside the
+Rive editor by placing keyframes on the Timeline for each mouth shape state.
+
+The tool generated ${timeline.length} viseme events from your text. Each event
+maps a character (or digraph) to one of 10 mouth shapes (states 00–09).
+
+================================================================================
+  YOUR RIVE FILE REQUIREMENTS
+================================================================================
+
+1. A State Machine named:   sm-mouth
+   With a Number input named: phoneme  (values 0–9)
+
+2. A separate State Machine or Animation named:  sm-inputs
+   (used at runtime by the JS playback code)
+
+3. Ten states in sm-mouth, one per mouth shape:
+   Value 0  →  00_NEUTRAL        (rest / silence)
+   Value 1  →  01_AEI            (A, E, I sounds)
+   Value 2  →  02_BMP            (B, M, P — lips closed)
+   Value 3  →  03_FV             (F, V — teeth on lip)
+   Value 4  →  04_CDGKNRSTXYZ    (most consonants)
+   Value 5  →  05_U              (U, OO sounds)
+   Value 6  →  06_ChJSh          (Ch, J, Sh, H)
+   Value 7  →  07_L              (L — tongue tip)
+   Value 8  →  08_O              (O sound — round lips)
+   Value 9  →  09_QW             (Q, W — rounded)
+
+================================================================================
+  HOW TO ADD KEYFRAMES MANUALLY IN RIVE
+================================================================================
+
+Step 1 — Open your Rive file in the Rive editor (rive.app)
+
+Step 2 — Select the State Machine: sm-mouth
+
+Step 3 — Open the Timeline panel (bottom of the editor)
+
+Step 4 — Select the "phoneme" Number input track
+
+Step 5 — For each row in the KEYFRAME TABLE below:
+          a. Scrub the playhead to the timestamp shown (in ms)
+          b. Set the "phoneme" input value to the number shown
+          c. Right-click the track at that time → Add Keyframe
+             OR press K with the playhead at the correct position
+
+Step 6 — Set interpolation to HOLD (step) on every keyframe.
+          Mouth shapes should snap instantly — not interpolate.
+          Select all keyframes → right-click → Interpolation → Hold
+
+Step 7 — Add a final keyframe at the end of the audio returning
+          phoneme to 0 (00_NEUTRAL / mouth closed)
+
+Step 8 — Preview the animation and sync it against your audio clip.
+
+================================================================================
+  KEYFRAME TABLE  (${timeline.length} events)
+================================================================================
+
+  Time (ms)  |  Character   |  Rive State (phoneme value)
+  -----------+--------------+--------------------------------------------
+${keyframeLines}
+  -----------+--------------+--------------------------------------------
+  ${String(timeline[timeline.length - 1]?.timeMs + 120 || 0).padStart(6)}ms  |  [end]       |  00_NEUTRAL (value 0)  ← add closing keyframe
+
+================================================================================
+  TIPS
+================================================================================
+
+• The timestamps above are in milliseconds from the start of the audio.
+  If your Rive timeline uses seconds, divide each value by 1000.
+
+• If your audio starts at a non-zero offset in your Rive scene, shift all
+  timestamps by that offset amount.
+
+• Digraph events (e.g. "ch", "sh") are pre-merged — one keyframe covers both
+  characters. Do not add a separate keyframe for each letter of the digraph.
+
+• For smoother results, you can add a very short (30–50ms) ease-out back to
+  00_NEUTRAL between each phoneme if your voice has natural pauses.
+
+• To test: export your Rive file, load it with @rive-app/webgl2, and run the
+  playLipSync() function from the JS CODE tab above.
+
+================================================================================
+  VISEME MAP REFERENCE
+================================================================================
+
+  Value  State              Characters / Sounds
+  -----  -----------------  -------------------------------------------
+    0    00_NEUTRAL         silence, space, punctuation
+    1    01_AEI             A  E  I
+    2    02_BMP             B  M  P
+    3    03_FV              F  V
+    4    04_CDGKNRSTXYZ     C  D  G  K  N  R  S  T  X  Y  Z
+    5    05_U               U  (and OO sounds)
+    6    06_ChJSh           Ch  Sh  J  H
+    7    07_L               L
+    8    08_O               O
+    9    09_QW              Q  W
+
+================================================================================
+  rive.expert — lipsync tool  |  ${new Date().toISOString().slice(0, 10)}
+================================================================================
+`.trimStart();
+
+  renderCode('txt', rawTxt);
+}
+
+function downloadTxt() {
+  if (!rawTxt) return;
+  const btn = document.getElementById('btn-download-txt');
+  const blob = new Blob([rawTxt], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'rive-lipsync-guide.txt'; a.click();
+  URL.revokeObjectURL(url);
+  btn.textContent = 'DOWNLOADED!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'DOWNLOAD .TXT GUIDE'; btn.classList.remove('copied'); }, 2000);
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
